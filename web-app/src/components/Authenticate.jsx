@@ -8,13 +8,16 @@ export default function Authenticate() {
   const [isLoggedin, setIsLoggedin] = useState(false);
 
   useEffect(() => {
-    console.log(window.location.href);
+    // console.log(window.location.href);
+
+
+ 
 
     const authCodeRegex = /code=([^&]+)/;
     const isMatch = window.location.href.match(authCodeRegex);
 
-    if (isMatch) {
-      const authCode = isMatch[1];
+    if ( isMatch) {
+      const authCode = isMatch ? isMatch[1] : null;
 
       fetch(
         `http://localhost:8081/indentity/auth/outbound/authentication?code=${authCode}`,
