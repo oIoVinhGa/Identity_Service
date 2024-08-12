@@ -42,6 +42,7 @@ public interface UserService {
     List<UserReponese> getAllUsers();
 
 
+    boolean existsByUsername(String email);
 }
 
 @Service
@@ -111,5 +112,10 @@ class UserImplement implements UserService{
     public List<UserReponese> getAllUsers() {
         log.info("In method get Users");
         return userRepository.findAll().stream().map(userMapper::convertUserToReponese).toList();
+    }
+
+    @Override
+    public boolean existsByUsername(String email) {
+        return userRepository.existsByUsername(email);
     }
 }

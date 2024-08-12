@@ -7,6 +7,8 @@ import com.BitzNomad.identity_service.DtoRequest.UserUpdateRequest;
 import com.BitzNomad.identity_service.Mapper.Auth.UserMapper;
 import com.BitzNomad.identity_service.Service.UserService;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import java.util.List;
 @RestController
 @Slf4j
 @RequestMapping("/api/user")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRestController {
 
 
@@ -32,7 +35,7 @@ public class UserRestController {
     UserMapper userMapper;
 
     @PostMapping
-    public ApiResponse<UserReponese> createUser( @RequestBody @Valid UserCreateRequest request) {
+    ApiResponse<UserReponese> createUser( @RequestBody @Valid UserCreateRequest request) {
         log.info("User created");
         return ApiResponse.<UserReponese>builder()
                 .status(HttpStatus.CREATED.value())
@@ -42,7 +45,7 @@ public class UserRestController {
     }
 
     @GetMapping("/myinfo")
-    public ApiResponse<UserReponese> getMyInfo() {
+    ApiResponse<UserReponese> getMyInfo() {
         return ApiResponse.<UserReponese>builder()
                 .message("Your account login is info :")
                 .status(200)
@@ -51,7 +54,7 @@ public class UserRestController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserReponese>> getUserById(@PathVariable String id) {
+    ResponseEntity<ApiResponse<UserReponese>> getUserById(@PathVariable String id) {
         log.info("Getting user with id: {}", id);
         ApiResponse<UserReponese> result = new ApiResponse<>();
         result.setResult(userMapper.convertUserToReponese(userService.getUserById(id)));
@@ -60,7 +63,7 @@ public class UserRestController {
     }
 
     @PutMapping()
-    public ApiResponse<UserReponese> updateUser(@RequestBody @Valid  UserUpdateRequest request) {
+    ApiResponse<UserReponese> updateUser(@RequestBody @Valid  UserUpdateRequest request) {
         log.info("Updating user with id: {}" , request.getUsername());
         return ApiResponse.<UserReponese>builder()
                 .message("User"+ request.getUsername()+ "updated successfully")
@@ -71,13 +74,13 @@ public class UserRestController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable String id) {
+    void deleteUser(@PathVariable String id) {
         log.info("Deleting user with id: {}", id);
         userService.deleteUser(id);
     }
 
     @GetMapping
-    public ApiResponse<List<UserReponese>> getAllUsers() {
+    ApiResponse<List<UserReponese>> getAllUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         log.info("User name: {}", authentication.getName());

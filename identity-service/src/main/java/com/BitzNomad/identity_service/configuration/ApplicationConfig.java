@@ -1,8 +1,11 @@
 package com.BitzNomad.identity_service.configuration;
 
+import com.BitzNomad.identity_service.contant.PredefinePermission;
 import com.BitzNomad.identity_service.contant.PredefineRole;
+import com.BitzNomad.identity_service.entity.Auth.Permission;
 import com.BitzNomad.identity_service.entity.Auth.Role;
 import com.BitzNomad.identity_service.entity.Auth.User;
+import com.BitzNomad.identity_service.repository.PermissionRepository;
 import com.BitzNomad.identity_service.repository.RoleRepository;
 import com.BitzNomad.identity_service.repository.UserRepository;
 import lombok.AccessLevel;
@@ -11,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,11 +23,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @Slf4j
-@RequiredArgsConstructor
 public class ApplicationConfig {
     @NonFinal
     static final String ADMIN_USER_NAME = "admin";
@@ -32,40 +37,65 @@ public class ApplicationConfig {
     static final String ADMIN_PASSWORD = "admin";
 
 
+    @Autowired
+    UserRepository userRepository;
 
+    @Autowired
+    RoleRepository roleRepository;
 
-    private final UserRepository userRepository;
-
-
-    private final RoleRepository roleRepository;
-
-
+    @Autowired
+    PermissionRepository permissionRepository;
 
 
     @Bean
     ApplicationRunner applicationRunner(PasswordEncoder passwordEncoder) {
         return args -> {
-            if (userRepository.findByUsername("admin").isEmpty()){
-                roleRepository.save(Role.builder()
-                        .name(PredefineRole.USER_ROLE)
-                        .description("User role")
-                        .build());
+            // Tạo các quyền CRUD
+            createPermissionIfNotExists(PredefinePermission.CREATE_PERMISSION, "Create permission");
+            createPermissionIfNotExists(PredefinePermission.UPDATE_PERMISSION, "Update permission");
+            createPermissionIfNotExists(PredefinePermission.DELETE_PERMISSION, "Delete permission");
+            createPermissionIfNotExists(PredefinePermission.VIEW_PERMISSION, "Read permission");
 
-                Role adminRole = roleRepository.save(Role.builder()
-                        .name(PredefineRole.ADMIN_ROLE)
-                        .description("Admin role")
-                        .build());
+            createPermissionIfNotExists(PredefinePermission.VIEW_ROLE,"Read role");
+            createPermissionIfNotExists(PredefinePermission.CREATOR_ROLE, "Create role");
+            createPermissionIfNotExists(PredefinePermission.UPDATE_ROLE,"Update role");
+            createPermissionIfNotExists(PredefinePermission.DELETE_ROLE,"Delete role");
+// Tạo role với các quyền CRUD
+            Role adminRole = roleRepository.save(Role.builder()
+                    .name(PredefineRole.ADMIN_ROLE)
+                    .description("Admin role")
+                    .permissions(
+                            new HashSet<>(permissionRepository.findAll())
+                    )
+                    .build());
 
-                var roles = new HashSet<Role>();
-                roles.add(adminRole);
-                User user = User.builder()
-                        .username(ADMIN_USER_NAME)
-                        .password(passwordEncoder.encode(ADMIN_PASSWORD))
-                        .roles(roles)
-                        .build();
-                userRepository.save(user);
-                log.warn("admin user has been created with default password: admin, please change it");
-            }
+            Role userRole = roleRepository.save(Role.builder()
+                    .name(PredefineRole.OWNER_ROLE)
+                    .description("User role")
+                    .permissions(Set.of(
+                    ))
+                    .build());
+
+            Role customerRole = roleRepository.save(Role.builder()
+                    .name(PredefineRole.OWNER_ROLE)
+                    .description("Customer role")
+                    .permissions(Set.of(
+                    ))
+                    .build());
+
+            // Tạo user với role admin
+            Set<Role> roles = new HashSet<>();
+            roles.add(adminRole);
+
+            User user = User.builder()
+                    .username(ADMIN_USER_NAME)
+                    .password(passwordEncoder.encode(ADMIN_PASSWORD))
+                    .roles(roles)
+                    .build();
+            userRepository.save(user);
+
+            log.warn("admin user has been created with default password: admin, please change it");
+
         };
     }
     @Bean
@@ -76,5 +106,17 @@ public class ApplicationConfig {
     @Bean
     ModelMapper modelMapper() {
         return new ModelMapper();
+    }
+
+
+
+    // Phương thức tạo quyền nếu chưa tồn tại
+    private void createPermissionIfNotExists(String name, String description) {
+        if (!permissionRepository.existsById(name)) {
+            permissionRepository.save(Permission.builder()
+                    .name(name)
+                    .description(description)
+                    .build());
+        }
     }
 }

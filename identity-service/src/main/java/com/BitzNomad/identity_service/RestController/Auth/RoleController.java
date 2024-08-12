@@ -5,6 +5,8 @@ import com.BitzNomad.identity_service.DtoReponese.ApiResponse;
 import com.BitzNomad.identity_service.DtoReponese.RoleReponese;
 import com.BitzNomad.identity_service.DtoRequest.RoleRequest;
 import com.BitzNomad.identity_service.Service.RoleService;
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,13 +14,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("auth/role")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleController {
 
     @Autowired
     RoleService roleService;
 
     @PostMapping
-    public ApiResponse<RoleReponese> createRole(@RequestBody RoleRequest request) {
+    ApiResponse<RoleReponese> createRole(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleReponese>builder()
                 .result(roleService.create(request))
                 .build();
@@ -26,14 +29,14 @@ public class RoleController {
 
 
     @GetMapping
-    public ApiResponse<List<RoleReponese>> getRoles() {
+    ApiResponse<List<RoleReponese>> getRoles() {
         return ApiResponse.<List<RoleReponese>>builder()
                 .result(roleService.findAll())
                 .build();
     }
 
     @DeleteMapping("{roleId}")
-    public ApiResponse<Void> deleteRole(@PathVariable("roleId") String roleId) {
+    ApiResponse<Void> deleteRole(@PathVariable("roleId") String roleId) {
         roleService.delete(roleId);
         return ApiResponse.<Void>builder()
                 .status(204)
@@ -42,7 +45,7 @@ public class RoleController {
     }
 
     @PutMapping
-    public ApiResponse<RoleReponese> updateRole(@RequestBody RoleRequest request) {
+    ApiResponse<RoleReponese> updateRole(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleReponese>builder()
                 .message("Update Role successfully !")
                 .result(roleService.update(request))
