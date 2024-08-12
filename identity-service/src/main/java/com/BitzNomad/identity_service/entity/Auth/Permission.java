@@ -1,12 +1,10 @@
-package com.BitzNomad.identity_service.entity;
+package com.BitzNomad.identity_service.entity.Auth;
 
+import com.BitzNomad.identity_service.entity.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Entity
 @Getter
@@ -15,12 +13,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Role {
+public class Permission extends BaseEntity<String> {
     @Id
     String name;
     String description;
-
-
-    @ManyToMany
-    Set<Permission> permissions;
 }

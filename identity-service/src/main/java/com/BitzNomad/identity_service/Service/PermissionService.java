@@ -4,10 +4,9 @@ import com.BitzNomad.identity_service.DtoReponese.PermissionReponese;
 import com.BitzNomad.identity_service.DtoRequest.PermissionRequest;
 import com.BitzNomad.identity_service.Exception.AppException;
 import com.BitzNomad.identity_service.Exception.ErrorCode;
-import com.BitzNomad.identity_service.Mapper.PermissionMapper;
-import com.BitzNomad.identity_service.entity.Permission;
+import com.BitzNomad.identity_service.Mapper.Auth.PermissionMapper;
+import com.BitzNomad.identity_service.entity.Auth.Permission;
 import com.BitzNomad.identity_service.repository.PermissionRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -37,8 +36,14 @@ class PermissionImpl implements PermissionService {
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public void delete(String permissionid) {
-        permissionRepository.findById(permissionid).orElseThrow( () -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        permissionRepository.deleteById(permissionid);
+        permissionRepository.findById(permissionid)
+                .ifPresentOrElse(
+                        p -> {
+                            p.setDeleted(true);
+                            permissionRepository.save(p);
+                        },
+                        () -> { throw new AppException(ErrorCode.USER_NOT_EXISTED); }
+                );
     }
 
     @Override

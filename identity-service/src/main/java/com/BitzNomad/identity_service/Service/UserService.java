@@ -5,23 +5,21 @@ import com.BitzNomad.identity_service.DtoRequest.UserCreateRequest;
 import com.BitzNomad.identity_service.DtoRequest.UserUpdateRequest;
 import com.BitzNomad.identity_service.Exception.AppException;
 import com.BitzNomad.identity_service.Exception.ErrorCode;
-import com.BitzNomad.identity_service.Mapper.UserMapper;
+import com.BitzNomad.identity_service.Mapper.Auth.UserMapper;
 import com.BitzNomad.identity_service.contant.PredefineRole;
-import com.BitzNomad.identity_service.entity.Role;
-import com.BitzNomad.identity_service.entity.User;
+import com.BitzNomad.identity_service.entity.Auth.Role;
+import com.BitzNomad.identity_service.entity.Auth.User;
 import com.BitzNomad.identity_service.repository.RoleRepository;
 import com.BitzNomad.identity_service.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.internal.constraintvalidators.hv.ParameterScriptAssertValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -55,14 +53,17 @@ class UserImplement implements UserService{
    UserRepository userRepository;
     @Autowired
    PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
+    @Autowired
+     RoleRepository roleRepository;
 
+    @Autowired
+    UserMapper userMapper;
 
     @Override
     public UserReponese createUser(UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) throw new AppException(ErrorCode.UserExitsted);
         // Convert the UserRequest to a User entity
-        User user = UserMapper.UserCreateconvertToEntity(request);
+        User user = userMapper.UserCreateconvertToEntity(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         HashSet<Role> roles = new HashSet<>();
         roleRepository.findById(PredefineRole.USER_ROLE).ifPresent(roles::add);
@@ -74,7 +75,7 @@ class UserImplement implements UserService{
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
         // Return the saved user entity
-        return UserMapper.convertUserToReponese(user);
+        return userMapper.convertUserToReponese(user);
 
     }
 
@@ -83,7 +84,7 @@ class UserImplement implements UserService{
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
         User user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return UserMapper.convertUserToReponese(user);
+        return userMapper.convertUserToReponese(user);
     }
 
     @Override
@@ -94,7 +95,7 @@ class UserImplement implements UserService{
     @Override
     @PostAuthorize("returnObject.username == authentication.name")
     public User updateUser(UserUpdateRequest request) {
-        User user = UserMapper.UserUpdateconvertToEntity(request,roleRepository,passwordEncoder);
+        User user = userMapper.UserUpdateconvertToEntity(request);
         return userRepository.save(user);
     }
 
@@ -105,10 +106,10 @@ class UserImplement implements UserService{
     }
 
     @Override
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PreAuthorize("hasAuthority('WRITE_DATA')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("hasAuthority('WRITE_DATA')")
     public List<UserReponese> getAllUsers() {
         log.info("In method get Users");
-        return userRepository.findAll().stream().map(UserMapper::convertUserToReponese).toList();
+        return userRepository.findAll().stream().map(userMapper::convertUserToReponese).toList();
     }
 }

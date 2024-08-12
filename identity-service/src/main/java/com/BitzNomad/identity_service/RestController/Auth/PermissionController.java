@@ -1,4 +1,4 @@
-package com.BitzNomad.identity_service.RestController;
+package com.BitzNomad.identity_service.RestController.Auth;
 
 import com.BitzNomad.identity_service.DtoReponese.ApiResponse;
 import com.BitzNomad.identity_service.DtoReponese.PermissionReponese;

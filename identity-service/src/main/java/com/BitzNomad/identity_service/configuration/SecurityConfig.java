@@ -34,7 +34,11 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPONIT = {"/api/user","/auth/login"
             ,"/auth/logout","/auth/instrospec","/auth/refesh",
-            "/auth/outbound/authentication"};
+            "/auth/outbound/authentication","/user/myinfo"};
+
+    // phai dc tat truoc khi public Error *********************************
+    private final String[] PUBLIC_SWAGGER = {"/swagger-ui/*","/swagger-ui-custom.html"
+            , "/v3/api-docs/*", "/api-docs/*","/api-docs"};
     private final String[] GET_PUBLIC_ENDPONIT = {"/api/user"};
 
     @Value("${jwt.secretKey}")
@@ -47,7 +51,8 @@ public class SecurityConfig {
         //Config endponit authentication
         httpSecurity.authorizeRequests(request -> request
                         .requestMatchers(HttpMethod.POST,PUBLIC_ENDPONIT).permitAll()
-                        .anyRequest().authenticated());
+                .requestMatchers(PUBLIC_SWAGGER).permitAll() // Công khai các đường dẫn Swagger
+                .anyRequest().authenticated());
 
         //config oauth2
                 httpSecurity.oauth2ResourceServer(oauth2 ->

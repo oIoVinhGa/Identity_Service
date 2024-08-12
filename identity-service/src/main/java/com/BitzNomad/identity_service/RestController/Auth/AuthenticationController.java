@@ -1,4 +1,4 @@
-package com.BitzNomad.identity_service.RestController;
+package com.BitzNomad.identity_service.RestController.Auth;
 
 import com.BitzNomad.identity_service.DtoReponese.ApiResponse;
 import com.BitzNomad.identity_service.DtoReponese.AuthenticationResponse;
@@ -10,10 +10,8 @@ import com.BitzNomad.identity_service.DtoRequest.RefeshRequest;
 import com.BitzNomad.identity_service.Service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -28,6 +26,7 @@ public class AuthenticationController {
     AuthenticationService   authenticationService;
 
     @PostMapping("/login")
+    @CrossOrigin
     ApiResponse<AuthenticationResponse>  authenticate(@RequestBody AuthenticationRequest request) {
 
         AuthenticationResponse result = authenticationService.authenticate(request);

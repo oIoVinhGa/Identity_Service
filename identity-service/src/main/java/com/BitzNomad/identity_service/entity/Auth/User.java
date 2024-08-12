@@ -1,6 +1,6 @@
-package com.BitzNomad.identity_service.entity;
+package com.BitzNomad.identity_service.entity.Auth;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.BitzNomad.identity_service.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,7 +15,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
+public class User extends BaseEntity<String> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

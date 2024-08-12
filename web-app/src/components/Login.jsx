@@ -13,7 +13,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import { OAuthConfig } from "../configurations/configuration";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getToken } from "../services/localStorageService";
+import { getToken, setToken } from "../services/localStorageService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ export default function Login() {
     const authUrl = OAuthConfig.authUri;
     const googleClientId = OAuthConfig.clientId;
 
+    //Redirect to Google form auth
     const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
       callbackUrl
     )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
@@ -30,6 +31,30 @@ export default function Login() {
     console.log(targetUrl);
 
     window.location.href = targetUrl;
+  };
+
+  const handleClickLogin = async () => {
+    console.log("username", username, password);
+    console.log(JSON.stringify({ username, password }));
+    const responseLogin = await fetch(
+      "http://localhost:8081/indentity/auth/login",
+
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Specify JSON content type
+        },
+        body: JSON.stringify({ username, password }),
+      }
+    );
+    const data = await responseLogin.json();
+    if (data.status == 1000) {
+      console.log(data);
+      setToken(data.result.token);
+      navigate("/");
+    } else {
+      alert("Login failed");
+    }
   };
 
   const handleClickGitHub = () => {
@@ -77,7 +102,7 @@ export default function Login() {
             <Typography variant="h5" component="h1" gutterBottom>
               Welcome to ArtDevs Social
             </Typography>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+            <Box component="form" onSubmit={handleClickGoogle} sx={{ mt: 2 }}>
               <TextField
                 label="Username"
                 variant="outlined"
@@ -104,7 +129,7 @@ export default function Login() {
                 variant="contained"
                 color="secondary"
                 size="large"
-                onClick={handleClickGoogle}
+                onClick={handleClickLogin}
                 fullWidth
                 sx={{
                   gap: "10px",

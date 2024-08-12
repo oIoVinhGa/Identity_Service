@@ -5,11 +5,15 @@ import com.BitzNomad.identity_service.DtoReponese.IntrospecResponsee;
 import com.BitzNomad.identity_service.DtoRequest.*;
 import com.BitzNomad.identity_service.Exception.AppException;
 import com.BitzNomad.identity_service.Exception.ErrorCode;
+import com.BitzNomad.identity_service.Utils.RandomPasswordGenerator;
+import com.BitzNomad.identity_service.contant.PredefineRole;
 import com.BitzNomad.identity_service.entity.InvalidatedToken;
-import com.BitzNomad.identity_service.entity.User;
+import com.BitzNomad.identity_service.entity.Auth.Role;
+import com.BitzNomad.identity_service.entity.Auth.User;
 import com.BitzNomad.identity_service.repository.InvalidatedRepository;
 import com.BitzNomad.identity_service.repository.httpclient.OutboundIdentityClient;
 import com.BitzNomad.identity_service.repository.UserRepository;
+import com.BitzNomad.identity_service.repository.httpclient.OutboundUserClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -42,6 +46,9 @@ public class AuthenticationService {
 
     @Autowired
     OutboundIdentityClient outboundIdentityClient;
+
+    @Autowired
+    OutboundUserClient  outboundUserClient;
 
     @Value("${jwt.secretKey}")
     private String SignerKey;
@@ -177,7 +184,7 @@ public class AuthenticationService {
             user.getRoles().forEach(role -> {
                 stringJoiner.add("ROLE_" + role.getName());
                 if (!CollectionUtils.isEmpty(role.getPermissions()))
-                    role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
+                    role.getPermissions().stream().filter(permission -> !permission.isDeleted()).forEach(permission -> stringJoiner.add(permission.getName()));
             });
         return stringJoiner.toString();
     }
@@ -212,9 +219,30 @@ public class AuthenticationService {
                 .build());
 
 
+        var userInfo = outboundUserClient.GetUserInfo("json",response.getAccessToken());
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder()
+                .name(PredefineRole.USER_ROLE)
+                .build());
+
+        var user = userRepository.findByUsername(userInfo.getEmail()).orElseGet(
+                () -> userRepository.save(User.builder()
+                                .firstName(userInfo.getGivenName())
+                                .username(userInfo.getEmail())
+                                .lastName(userInfo.getFamilyName())
+                                .roles(roles)
+                        .build())
+        );
+
+        //Onbard token Google -> systemToken
+
+        var token = generateToken(user);
+
+        log.info(RandomPasswordGenerator.generateRandomPassword(8));
 
         return AuthenticationResponse.builder()
-                .token(response.getAccessToken())
+                .authenticated(true)
+                .token(token)
                 .build();
     }
 }
