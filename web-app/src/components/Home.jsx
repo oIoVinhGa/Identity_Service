@@ -9,11 +9,19 @@ export default function Home() {
   const [userDetails, setUserDetails] = useState({});
 
   const getUserDetails = async (accessToken) => {
+    console.log("Access" + accessToken);
     const response = await fetch(
-      `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`
+      `http://localhost:8081/indentity/api/user/myinfo`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`, // Add the Bearer token in the Authorization header
+        },
+      }
     );
+
     const data = await response.json();
-    
+    console.log(data);
     setUserDetails(data);
   };
 
