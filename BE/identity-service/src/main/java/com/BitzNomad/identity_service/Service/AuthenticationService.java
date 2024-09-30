@@ -6,7 +6,7 @@ import com.BitzNomad.identity_service.DtoRequest.*;
 import com.BitzNomad.identity_service.Exception.AppException;
 import com.BitzNomad.identity_service.Exception.ErrorCode;
 import com.BitzNomad.identity_service.Utils.RandomPasswordGenerator;
-import com.BitzNomad.identity_service.contant.PredefineRole;
+import com.BitzNomad.identity_service.constant.PredefineRole;
 import com.BitzNomad.identity_service.entity.InvalidatedToken;
 import com.BitzNomad.identity_service.entity.Auth.Role;
 import com.BitzNomad.identity_service.entity.Auth.User;

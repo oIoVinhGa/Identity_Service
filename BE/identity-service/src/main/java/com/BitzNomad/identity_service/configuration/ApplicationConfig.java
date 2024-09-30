@@ -1,7 +1,7 @@
 package com.BitzNomad.identity_service.configuration;
 
-import com.BitzNomad.identity_service.contant.PredefinePermission;
-import com.BitzNomad.identity_service.contant.PredefineRole;
+import com.BitzNomad.identity_service.constant.PredefinePermission;
+import com.BitzNomad.identity_service.constant.PredefineRole;
 import com.BitzNomad.identity_service.entity.Auth.Permission;
 import com.BitzNomad.identity_service.entity.Auth.Role;
 import com.BitzNomad.identity_service.entity.Auth.User;
@@ -9,7 +9,6 @@ import com.BitzNomad.identity_service.repository.PermissionRepository;
 import com.BitzNomad.identity_service.repository.RoleRepository;
 import com.BitzNomad.identity_service.repository.UserRepository;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Configuration
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -70,7 +68,7 @@ public class ApplicationConfig {
                     .build());
 
             Role userRole = roleRepository.save(Role.builder()
-                    .name(PredefineRole.OWNER_ROLE)
+                    .name(PredefineRole.USER_ROLE)
                     .description("User role")
                     .permissions(Set.of(
                     ))

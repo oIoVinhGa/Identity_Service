@@ -1,4 +1,4 @@
-package com.BitzNomad.identity_service.contant;
+package com.BitzNomad.identity_service.constant;
 
 public class PredefinePermission {
 

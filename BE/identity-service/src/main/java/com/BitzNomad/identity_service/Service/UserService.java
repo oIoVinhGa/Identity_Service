@@ -6,7 +6,7 @@ import com.BitzNomad.identity_service.DtoRequest.UserUpdateRequest;
 import com.BitzNomad.identity_service.Exception.AppException;
 import com.BitzNomad.identity_service.Exception.ErrorCode;
 import com.BitzNomad.identity_service.Mapper.Auth.UserMapper;
-import com.BitzNomad.identity_service.contant.PredefineRole;
+import com.BitzNomad.identity_service.constant.PredefineRole;
 import com.BitzNomad.identity_service.entity.Auth.Role;
 import com.BitzNomad.identity_service.entity.Auth.User;
 import com.BitzNomad.identity_service.repository.RoleRepository;
